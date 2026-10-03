@@ -7,9 +7,9 @@ if(matches.length!==1||/^import /m.test(vendor))throw Error('Unexpected vendor m
 const exports=matches[0][1].split(',').map(s=>s.trim().replace(/^(\w+) as (\w+)$/,'$2: $1')).join(',');
 vendor=vendor.replace(matches[0][0],'return {'+exports+'};');
 const clean=s=>s.replace(/^import .*?;\r?\n/gm,'').replace(/^export /gm,'');
-const source='const T = (() => {\n'+vendor+'\n})();\n'+clean(read('engine.js'))+'\n'+clean(read('world.js'))+'\n'+clean(read('app.js')).replaceAll('emberhold-save-v1','emberhold-offline-v1');
-const css=read('style.css').replace(/^@import[^;]+;\r?\n/m,'');
-let page=read('index.html').replace('<link rel="stylesheet" href="style.css">',()=>'<style>'+css+'</style>').replace('<script type="module" src="app.js"></script>',()=>'<script type="module">'+source.replace(/<\/script/gi,'<\\/script')+'</script>');
+const source='const T = (() => {\n'+vendor+'\n})();\n'+clean(read('engine.js'))+'\n'+clean(read('world.js'))+'\n'+clean(read('interaction.js'))+'\n'+clean(read('formation.js'))+'\n'+clean(read('app.js')).replaceAll('emberhold-save-v1','emberhold-offline-v1');
+const css=read('style.css').replace(/^@import[^;]+;\r?\n/m,'')+'\n'+read('tactics.css');
+let page=read('index.html').replace('<link rel="stylesheet" href="tactics.css">','').replace('<link rel="stylesheet" href="style.css">',()=>'<style>'+css+'</style>').replace('<script type="module" src="app.js"></script>',()=>'<script type="module">'+source.replace(/<\/script/gi,'<\\/script')+'</script>');
 fs.writeFileSync('dist/emberhold-offline.html',page);
 fs.writeFileSync('offline-check.mjs',page.match(/<script type="module">([\s\S]*)<\/script>/)[1]);
 console.log('Built self-contained offline game: dist/emberhold-offline.html');

@@ -1,0 +1,91 @@
+/* v1.2: fixed card hit areas, direct manipulation, and clearer battle information. */
+[hidden] { display: none !important; }
+.unit-card, .unit-card:hover, .unit-card:active { transform: none; }
+.unit-card { transition: background .18s, border-color .18s, box-shadow .18s; }
+.unit-card:not(:disabled):hover { box-shadow: inset 0 0 0 1px var(--unit-color), 0 0 16px #c5d89b12; }
+.unit-card:disabled:hover { background: linear-gradient(110deg,#28433d,#1a3437); }
+.unit-card.merge-ready { border-color: #e9c880; background: linear-gradient(120deg,#4a5038,#203e39); }
+.unit-card .merge-badge { color: #ffe7a6; background: #6d623b; padding: 2px 4px; border-radius: 3px; }
+.unit-card h3 { pointer-events: none; }
+.bench-slot { touch-action: none; user-select: none; }
+.bench-slot.occupied { cursor: grab; }
+#bench { border: 1px solid transparent; border-radius: 5px; transition: border-color .15s, background .15s; }
+#bench.drop-ready { border-color: #92e6bc; background: #82cfb329; }
+#bench.drop-blocked { border-color: #e89693; background: #da6c6529; }
+.shop-lock { margin-left: 8px; flex-shrink: 0; font-size: 11px; border-radius: 4px; padding: 8px 10px; background: #203c3b; }
+.shop-lock.active { color: #ffe1a1; border-color: #c9ab69; background: #62563388; }
+.wave-routes { display: flex; gap: 5px; flex-wrap: wrap; margin: 10px 0 7px; }
+.wave-routes span { font-size: 10px; color: #efc394; padding: 3px 7px; border: 1px solid #be976940; border-radius: 3px; background: #cba36c0c; }
+.wave-composition { font-size: 10px; line-height: 1.8; color: #adc2b8; margin-bottom: 12px; }
+.wave-progress-track { height: 3px; background: #ffffff12; margin-bottom: 13px; overflow: hidden; }
+.wave-progress-track i { display: block; height: 100%; background: #d6b78b; width: 0; transition: width .25s; }
+.forecast p.prep-advice { color: #c9caa0; font-size: 10px; line-height: 1.8; margin: 11px 0 0; }
+.speed-button { font-size: 12px; font-weight: 600; }
+.drag-label { position: fixed; z-index: 50; max-width: 255px; background: #15382fea; border: 1px solid #9be4ba; border-radius: 5px; box-shadow: 0 8px 25px #0004; padding: 10px 13px; font-size: 12px; color: #d7f1ca; pointer-events: none; }
+.drag-label.invalid { border-color: #e6a08e; color: #f6c6b4; background: #49332fe8; }
+.dragging-unit, .dragging-unit * { cursor: grabbing !important; user-select: none !important; }
+.dragging-unit .left-panel, .dragging-unit .right-panel { opacity: .25; pointer-events: none; }
+.dragging-unit .left-panel *, .dragging-unit .right-panel * { pointer-events: none; }
+.battle-report { text-align: left; border: 1px solid #8cad8640; padding: 15px 17px; background: #091f254f; border-radius: 5px; margin: 18px 0; }
+.report-head { display: flex; justify-content: space-between; gap: 10px; color: #e5d4a9; font-size: 13px; }
+.report-head span { color: #9eb7a9; font-size: 11px; }
+.report-summary { display: flex; gap: 20px; color: #95afa4; font-size: 11px; margin: 12px 0; }
+.report-summary b { color: #e5d4a9; font-weight: 500; }
+.report-unit { display: flex; justify-content: space-between; gap: 10px; position: relative; padding: 5px 0 7px; font-size: 11px; margin-bottom: 6px; color: #cad8c1; }
+.report-unit b { color: #dfd5b7; font-weight: 500; }
+.report-unit i { position: absolute; left: 0; bottom: 0; height: 2px; opacity: .65; }
+.battle-report small { display: block; color: #9fb09c; font-size: 10px; line-height: 1.8; margin-top: 10px; }
+.modal-content.compact { max-width: 590px; }
+.modal-content { scrollbar-width: thin; scrollbar-color: #789786 #10292f; }
+@media (max-width: 700px) {
+  .brand div > span { letter-spacing: 1px; }
+  .topbar { gap: 6px; }
+  .day-display { margin-left: auto; }
+  #last-report { display: none; }
+  .bench-row { gap: 5px; }
+  #bench { flex: 1; min-width: 0; display: grid; grid-template-columns: repeat(8,minmax(0,1fr)); gap: 3px; }
+  .bench-slot { width: 100%; min-width: 0; }
+  .shop-lock { width: 45px; padding: 5px 3px; margin-left: 0; font-size: 9px; line-height: 1.5; }
+  .wave-routes { gap: 3px; margin: 6px 0; }
+  .wave-routes span { font-size: 8px; padding: 2px 4px; }
+  .wave-composition, .forecast p.prep-advice { font-size: 8px; line-height: 1.6; }
+  .wave-composition { margin-bottom: 7px; }
+  .forecast p.prep-advice { margin-top: 7px; }
+  .drag-label { font-size: 10px; padding: 8px 10px; }
+  .report-summary { gap: 14px; }
+  .battle-report { padding: 12px; }
+}
+@media (pointer: coarse) and (min-width: 701px) {
+  #touch-controls { display: block; position: absolute; left: 25px; right: 25px; bottom: 195px; pointer-events: none; }
+  #joystick { position: relative; pointer-events: auto; width: 76px; height: 76px; border-radius: 50%; border: 1px solid #d3d8b750; background: #1d444060; touch-action: none; }
+  #joystick i { position: absolute; left: 23px; top: 23px; width: 30px; height: 30px; border-radius: 50%; background: #bbcea37a; border: 1px solid #e6deb580; }
+  #touch-dash { pointer-events: auto; position: absolute; right: 0; bottom: 7px; width: 50px; height: 50px; border-radius: 50%; font-size: 11px; background: #22484699; touch-action: none; }
+  body.night #touch-controls { bottom: 65px; }
+}
+@media (max-height: 620px) and (min-width: 701px) {
+  .forecast p.prep-advice, .wave-composition { display: none; }
+  .wave-routes { margin: 5px 0; }
+  .forecast h2 { font-size: 16px; }
+  .core-status { padding: 6px; }
+}
+@media (max-height: 520px) and (min-width: 701px) {
+  .right-panel { width: 165px; }
+  .forecast { padding: 8px; }
+  .forecast .eyebrow { margin-bottom: 5px; font-size: 9px; }
+  .forecast h2 { margin-bottom: 4px; font-size: 14px; }
+  .forecast p { margin-bottom: 4px; font-size: 9px; line-height: 1.4; }
+  .forecast-line { padding-top: 4px; font-size: 8px; }
+  .wave-routes { margin: 4px 0; }
+  .wave-routes span { font-size: 8px; padding: 2px 4px; }
+  .core-status { position: fixed; left: 20px; bottom: 14px; width: 130px; margin: 0; }
+  .core-status p { font-size: 8px; }
+  .core-status b { font-size: 11px; }
+  .core-icon { display: none; }
+  #blessings { display: none; }
+}
+@media (max-height: 520px) and (min-width: 701px) and (pointer: coarse) {
+  #touch-controls { right: auto; width: 130px; bottom: 110px; }
+  #touch-dash { right: auto; left: 83px; bottom: 0; width: 40px; height: 40px; }
+  body.night #touch-controls { bottom: 110px; }
+}
+@media (prefers-reduced-motion: reduce) { button, #toast, #combat-banner, .health-track i { transition: none; } }

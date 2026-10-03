@@ -1,8 +1,8 @@
-# 余烬棋城 · Emberhold v1.1
+# 余烬棋城 · Emberhold v1.2
 
 白昼落子，长夜守城。一款结合昼夜城防经营与自走棋阵容构筑的原创单人 3D 网页游戏。
 
-**[在线游玩](https://starvilfisher-maker.github.io/Emberhold/)** · **[v1.1 发布](https://github.com/starvilfisher-maker/Emberhold/releases/tag/v1.1)** · **[版本记录](CHANGELOG.md)**
+**[在线游玩](https://starvilfisher-maker.github.io/Emberhold/)** · **[v1.2 发布](https://github.com/starvilfisher-maker/Emberhold/releases/tag/v1.2)** · **[版本记录](CHANGELOG.md)**
 
 ## 玩法
 
@@ -22,7 +22,7 @@
 | 开始守夜 | Enter / 迎接长夜按钮 |
 | 暂停 / 取消选择 | Esc |
 | 招募棋子 | 点击商店卡牌 |
-| 部署棋子 | 点击备战席棋子，再点击地面方格；也可一键上阵 |
+| 部署棋子 | 拖动场上 / 备战席棋子到方格；拖到棋子上交换；拖回备战席撤回，也保留点击布阵 |
 | 建造 / 升级 | 点击金色城防基座 |
 
 每夜基础收入 12 金币；每存 10 金币获得 1 利息，上限 5；农庄每级收入 4。羁绊按已部署的不同棋种计算，同名棋子不重复计数。阵亡棋子次日复活，城堡倒下则远征结束。
@@ -44,12 +44,13 @@ node server.mjs
 打开 http://127.0.0.1:5179 。
 
 ```sh
-node test.mjs          # 游戏规则与六夜完整流程
+node test.mjs          # 10 项规则与六夜完整流程
+node test-interactions.mjs # 10 项交互与战术检查
 node build-offline.mjs # 更新离线单文件版本
 node build-pages.mjs   # 同步 docs/ 部署文件
 ```
 
-GitHub Pages 使用 `main` 分支的 `/docs` 目录。修改游戏后运行两个构建命令并提交 `dist` 和 `docs`。v1.1 对应的 Git 标签为 `v1.1`。
+GitHub Pages 使用 `main` 分支的 `/docs` 目录。修改游戏后运行两个构建命令并提交 `dist` 和 `docs`。v1.2 对应的 Git 标签为 `v1.2`。
 
 ## 项目结构
 
@@ -61,3 +62,13 @@ GitHub Pages 使用 `main` 分支的 `/docs` 目录。修改游戏后运行两�
 - `test.mjs`：十项规则检查与六夜通关模拟。
 
 Three.js 0.170.0 使用 MIT 许可证，见 [第三方许可证](dist/vendor/THREE-LICENSE.txt)。游戏模型与内容为本项目原创。在线字体加载失败时使用系统中文字体，离线版使用系统字体。
+
+## v1.2 布阵与战报
+
+- 商店按钮保持稳定；显示可升星提示，锁店可将剩余卡牌保留到下个白昼。手动刷新仍消耗 2 金币。
+- 直接拖动棋子布阵，预览落点和射程。拖到棋子上交换，拖回备战席撤回。拖到无效位置、按 Esc 或取消触摸都保留原位置。
+- 右侧显示本夜敌军组成，地图箭头标出入口；守夜可切换 1× / 2× 速度。
+- 黎明与终局展示实际伤害贡献、城堡受损、倒下棋子和收入。顶部战报按钮或暂停菜单可再次查看上夜战报。
+- 继续使用 v1.1 白昼存档。[v1.1 旧版下载](https://github.com/starvilfisher-maker/Emberhold/releases/tag/v1.1) 保留。
+
+完整体验分析与后续路线见 [ROADMAP.md](ROADMAP.md)。
