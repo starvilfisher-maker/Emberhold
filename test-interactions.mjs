@@ -33,7 +33,7 @@ test('Drag threshold, foreign pointers, release without move, and cancellation',
   assert.equal(drag.end(8, 40, 40), null);
 });
 test('Preview does not mutate, deployed swaps work at capacity, invalid drops keep positions', () => {
-  const g = new Game(4), [a,b] = g.deployed();
+  const g = new Game(4,{legacy:true}), [a,b] = g.deployed();
   g.state.level = 2;
   const before = g.serialize();
   assert.equal(g.placement(a.id, b.slot.x, b.slot.z).otherId, b.id);
@@ -48,7 +48,7 @@ test('Preview does not mutate, deployed swaps work at capacity, invalid drops ke
   assert.equal(g.state.gold, 32);
 });
 test('Bench swaps at full population and full bench recall are atomic', () => {
-  const g = new Game(4);
+  const g = new Game(4,{legacy:true});
   g.state.level = 2;
   for(let i=0;i<8;i++) g.state.units.push(g.makeUnit('warden'));
   const bench = g.state.units[2], deployed = g.deployed()[0], slot = {...deployed.slot};
@@ -60,7 +60,7 @@ test('Bench swaps at full population and full bench recall are atomic', () => {
   assert.equal(g.state.units.filter(u=>!u.slot).length, 8);
 });
 test('Night rejects placement previews, moves, recalls and shop locking', () => {
-  const g = new Game(2);
+  const g = new Game(2,{legacy:true});
   g.startNight();
   const before = JSON.stringify(g.state.units);
   assert.equal(g.placement('u1', 6.4, 0).ok, false);
@@ -70,7 +70,7 @@ test('Night rejects placement previews, moves, recalls and shop locking', () => 
   assert.equal(JSON.stringify(g.state.units), before);
 });
 test('Shop lock persists across dawn and saved games without reviving sold cards', () => {
-  const g = new Game(8);
+  const g = new Game(8,{legacy:true});
   g.buy(0);g.toggleShopLock();
   const shop = [...g.state.shop];
   const restored = Game.restore(g.serialize());
@@ -81,7 +81,7 @@ test('Shop lock persists across dawn and saved games without reviving sold cards
   assert.ok(restored.state.shop.every(key=>DEFS[key]));
 });
 test('v1.1 saves gain defaults while preserving army, economy and progression', () => {
-  const g = new Game(2);g.buy(0);
+  const g = new Game(2,{legacy:true});g.buy(0);
   const old = JSON.parse(g.serialize());
   delete old.state.shopLocked;delete old.state.report;delete old.state.lastReport;
   const r = Game.restore(JSON.stringify(old));
@@ -92,7 +92,7 @@ test('v1.1 saves gain defaults while preserving army, economy and progression', 
 });
 test('Wave composition agrees with spawned enemies for all six nights', () => {
   for(let round=1;round<=6;round++) {
-    const g = new Game(3);g.state.round=round;
+    const g = new Game(3,{legacy:true});g.state.round=round;
     for(let i=0;i<WAVES[round-1].count;i++)g.spawn();
     const actual={boss:0,ranged:0,armored:0,fast:0,regular:0};
     for(const e of g.state.enemies) actual[e.boss?'boss':e.armored?'armored':e.ranged?'ranged':e.speed===2.7?'fast':'regular']++;
@@ -100,7 +100,7 @@ test('Wave composition agrees with spawned enemies for all six nights', () => {
   }
 });
 test('Damage report excludes overkill, duplicate deaths, friendly damage and healing', () => {
-  const g = new Game(3);g.startNight();
+  const g = new Game(3,{legacy:true});g.startNight();
   const enemy={id:'enemy-test',kind:'enemy',hp:10},unit=g.deployed()[0];
   g.damage(enemy, 500, unit);g.damage(enemy, 50, unit);
   assert.equal(g.state.report.damage[unit.id].amount, 10);
@@ -113,7 +113,7 @@ test('Damage report excludes overkill, duplicate deaths, friendly damage and hea
   assert.equal(g.state.lastReport.damage[unit.id].amount, 10);
 });
 test('Nova contributes actual damage; a new night resets current report only', () => {
-  const g=new Game(4);g.startNight();
+  const g=new Game(4,{legacy:true});g.startNight();
   g.state.enemies=[{id:'near',kind:'enemy',hp:25,x:3,z:3},{id:'far',kind:'enemy',hp:100,x:20,z:20}];
   g.nova();assert.equal(g.state.report.damage.hero.amount,25);
   g.dawn();const report=g.state.lastReport;

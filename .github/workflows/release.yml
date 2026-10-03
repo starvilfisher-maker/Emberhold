@@ -26,6 +26,7 @@ jobs:
         run: |
           node test.mjs
           node test-interactions.mjs
+          node test-campaign.mjs
           node build-offline.mjs
           node build-pages.mjs
           node --check offline-check.mjs
