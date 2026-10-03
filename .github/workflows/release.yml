@@ -1,0 +1,48 @@
+name: Publish game release
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - package.json
+      - .github/workflows/release.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: game-release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Validate gameplay and build downloads
+        run: |
+          node test.mjs
+          node build-offline.mjs
+          node build-pages.mjs
+          node --check offline-check.mjs
+          git diff --exit-code -- dist docs
+      - name: Publish version and downloads
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION=$(node -p "JSON.parse(require('fs').readFileSync('package.json', 'utf8')).version")
+          TAG="v${VERSION%.0}"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Release $TAG already exists; keeping its files unchanged."
+            exit 0
+          fi
+          git archive --format=zip --output="emberhold-${TAG}-source.zip" HEAD
+          gh release create "$TAG" \
+            --target "$GITHUB_SHA" \
+            --title "余烬棋城 ${TAG}" \
+            --notes-file CHANGELOG.md \
+            dist/emberhold-offline.html \
+            "emberhold-${TAG}-source.zip"
