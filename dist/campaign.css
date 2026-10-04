@@ -260,3 +260,26 @@ body.shop-collapsed .shop-wrap { display:none; }
  #touch-zoom { right:auto; left:87px; bottom:48px; }
 }
 @media(prefers-reduced-motion:reduce) { * { scroll-behavior:auto !important; } }
+
+/* Quiet, reversible scene viewer; gameplay is paused while it is open. */
+#scene-toolbar[hidden]{display:none}
+body.scene-view #game>.topbar,body.scene-view #game>.left-panel,body.scene-view #game>.right-panel,body.scene-view #game>.bottom-panel,body.scene-view #game>footer,body.scene-view #touch-controls,body.scene-view #toast,body.scene-view #combat-banner{display:none!important}
+#scene-toolbar{position:absolute;z-index:12;left:32px;right:32px;bottom:28px;display:flex;align-items:flex-end;justify-content:space-between;gap:20px;pointer-events:none}
+#scene-toolbar>div{display:grid;gap:8px;text-shadow:0 2px 18px #092c38}
+#scene-toolbar span{font-size:9px;letter-spacing:4px;color:#d9d7b6}
+#scene-toolbar b{font-family:'Noto Serif SC',serif;font-size:27px;font-weight:500;letter-spacing:4px;color:#fbefce}
+#scene-toolbar small{font-size:11px;color:#c3d1c8}
+#scene-toolbar nav{display:flex;gap:6px;padding:9px;background:#102d35dd;border:1px solid #b9caa14d;border-radius:7px;backdrop-filter:blur(12px);pointer-events:auto}
+#scene-toolbar button{padding:9px 13px;font-size:12px;border-radius:4px;white-space:nowrap;background:#244348}
+#scene-toolbar button[aria-pressed=true],#exit-scene{color:#f7d998;border-color:#ddbb75a6}
+#scene-toolbar button:focus-visible{outline:2px solid #f7d998;outline-offset:2px}
+@media(max-width:700px){#scene-toolbar{left:14px;right:14px;bottom:max(16px,env(safe-area-inset-bottom));display:grid;gap:14px}#scene-toolbar b{font-size:22px}#scene-toolbar nav{gap:4px;padding:6px;justify-content:space-between}#scene-toolbar button{font-size:10px;padding:9px 7px}#view-scene{display:block}}
+@media(prefers-reduced-motion:reduce){#scene-toolbar *{transition:none}}
+/* Compact header leaves room for the new scene button on narrow phones. */
+@media(max-width:700px){
+ .topbar{display:grid;grid-template-columns:98px minmax(0,1fr) auto;column-gap:6px;align-items:center}
+ .brand{min-width:0;gap:0}.brand-symbol{display:none}.brand h1{font-size:15px;letter-spacing:2px;white-space:nowrap}.brand div>span{font-size:6px;letter-spacing:1.3px}
+ .day-display{padding:8px 5px;gap:4px;justify-content:center;min-width:0}.day-display b{font-size:10px;letter-spacing:0;white-space:nowrap}#phase-icon{font-size:16px}
+ .top-actions{gap:3px}.top-actions .icon-button{width:26px;height:28px;flex-shrink:0}
+}
+@media(max-width:359px){.topbar{grid-template-columns:86px minmax(0,1fr) auto}.brand h1{font-size:14px}.top-actions #help{display:none}}
