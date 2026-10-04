@@ -8,7 +8,7 @@ export function bindCampaignUI({getGame,modal,act,begin,getOptions,setOptions,ge
   const disabled=value=>value?'disabled':'';
   function setup(){
     const options=getOptions();
-    modal(`<div class="eyebrow">PLAN YOUR EXPEDITION · v1.4</div><h2>你将在哪里，守住黎明？</h2><p>八个长夜，十二种兵种。白昼经营与构筑，夜晚亲临战场。</p>
+    modal(`<div class="eyebrow">PLAN YOUR EXPEDITION · v1.5</div><h2>你将在哪里，守住黎明？</h2><p>八个长夜，十二种兵种。白昼经营与构筑，夜晚亲临战场。</p>
     <div class="hall-section-head"><h3>01 / 选择战场</h3><span>地形规则贯穿整场远征</span></div>
     <div class="biome-grid">${Object.entries(BIOMES).map(([id,b])=>`<button class="biome-card ${id===options.biome?'chosen':''}" data-biome="${id}" aria-pressed="${id===options.biome}" style="--biome:${b.color}"><div class="biome-art ${id}"><i></i><b>${b.icon}</b></div><strong>${b.name}</strong><small>${b.subtitle}</small><p>${b.desc}</p></button>`).join('')}</div>
     <div class="hall-section-head"><h3>02 / 选择难度</h3><span>新手推荐旅人</span></div>

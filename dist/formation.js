@@ -13,6 +13,7 @@ export function bindFormation({canvas, bench, world, game, ready, getSelected, s
     world.setPlacementPreview(null);
     label.hidden = true;
     document.body.classList.remove('dragging-unit');
+    document.body.classList.remove('panning-map');
     bench.classList.remove('drop-ready', 'drop-blocked');
   };
   const release = current => {
@@ -20,7 +21,7 @@ export function bindFormation({canvas, bench, world, game, ready, getSelected, s
   };
   const cancel = () => {
     const current = gesture.cancel();
-    if (current?.dragging) select(previous);
+    if (current?.dragging && current.unitId) select(previous);
     clearPreview();
     release(current);
   };
@@ -38,12 +39,15 @@ export function bindFormation({canvas, bench, world, game, ready, getSelected, s
     return {...game().placement(unit?.id, point?.x, point?.z), point};
   };
   const begin = (event, unitId, source) => {
-    if (!ready() || event.button !== 0 || event.isPrimary === false) return;
+    if (!ready() || ![0,1,2].includes(event.button) || source === 'bench' && event.button !== 0 || event.isPrimary === false) return;
+    if (event.button !== 0) unitId = null;
     if (game().state.phase !== 'day') unitId = null;
     if (!gesture.begin(event.pointerId, event.clientX, event.clientY, unitId, source)) return;
     previous = getSelected();
+    gesture.current.camera = source === 'world' && !unitId;
+    gesture.current.anchor = world.groundAt(event.clientX, event.clientY);
     canvas.setPointerCapture(event.pointerId);
-    if (unitId) event.preventDefault();
+    event.preventDefault();
   };
   canvas.addEventListener('pointerdown', event => begin(event, pick(event)?.id, 'world'));
   bench.addEventListener('pointerdown', event => {
@@ -52,6 +56,12 @@ export function bindFormation({canvas, bench, world, game, ready, getSelected, s
   });
   document.addEventListener('pointermove', event => {
     const current = gesture.move(event.pointerId, event.clientX, event.clientY);
+    if (current?.camera && current.dragging && ready()) {
+      event.preventDefault();close();
+      document.body.classList.add('panning-map');
+      current.anchor = world.dragCamera(current.anchor,event.clientX,event.clientY) || current.anchor;
+      return;
+    }
     if (!current?.unitId || !current.dragging || !ready()) return;
     event.preventDefault();
     close();
@@ -88,7 +98,7 @@ export function bindFormation({canvas, bench, world, game, ready, getSelected, s
       close();
     } else if (!current.dragging) {
       if (current.source === 'bench') { select(current.unitId); inspect(current.unitId); }
-      else clickGround(event, pick(event));
+      else if (event.button !== 1) clickGround(event, pick(event));
     }
   });
   canvas.addEventListener('lostpointercapture', event => {

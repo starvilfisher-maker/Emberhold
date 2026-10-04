@@ -10,13 +10,13 @@ export const BIOMES = {
   ruins: {name:'鎏金遗都', subtitle:'沙海中的余火', icon:'◇', desc:'每夜基础收入 +2；城堡初始生命为 700。', heal:45, income:2, speed:1, castle:700, color:'#e5c38a', ground:0xb4a276}
 };
 export const CHAPTERS = [
-  {name:'迷雾先锋',desc:'西桥 · 游荡者试探防线',count:14,dirs:[[-26,0]],hp:52,damage:8,interval:1.6,threat:'低',tip:'先合成二星前排，再补充远程输出。'},
+  {name:'迷雾先锋',desc:'西侧三路 · 游荡者试探防线',count:14,dirs:[[-26,0]],hp:52,damage:8,interval:1.6,threat:'低',tip:'先合成二星前排，再补充远程输出。'},
   {name:'双桥夹击',desc:'东西两侧 · 猎手与援军',count:22,dirs:[[-26,0],[26,0]],hp:78,damage:10,interval:1.35,threat:'中',tip:'分配两翼防守。现在可以选择核心专精。'},
-  {name:'断墙者',desc:'北桥与西桥 · 攻城车',count:28,dirs:[[0,-21],[-26,0]],hp:108,damage:13,interval:1.2,threat:'中',tip:'攻城车优先轰击建筑；用领主或前排主动拦截。'},
-  {name:'苍白监军',desc:'三桥 · 监军与疗愈祭师',count:32,dirs:[[-26,0],[26,0],[0,-21]],hp:125,damage:15,interval:1.05,threat:'首领',boss:'marshal',tip:'红圈落下前撤离领主。震荡可打断正在蓄力的首领。'},
-  {name:'猎影之夜',desc:'东西两侧 · 潜袭者绕后',count:38,dirs:[[-26,0],[26,0]],hp:148,damage:17,interval:1,threat:'高',tip:'潜袭者追击后排。给射手配护甲，留守卫保护。'},
-  {name:'破城洪流',desc:'三桥 · 重甲与攻城车',count:44,dirs:[[0,-21],[-26,0],[26,0]],hp:170,damage:19,interval:.92,threat:'高',tip:'法术穿透重甲，寒霜塔延缓军团；农庄与火力需要取舍。'},
-  {name:'无光圣歌',desc:'三桥 · 祭师与精锐军团',count:48,dirs:[[-26,0],[26,0],[0,-21]],hp:188,damage:21,interval:.88,threat:'极高',tip:'祭师会治疗附近敌人。突击姿态与范围伤害能快速清理。'},
+  {name:'断墙者',desc:'北、西、南三面 · 攻城车',count:28,dirs:[[0,-21],[-26,0]],hp:108,damage:13,interval:1.2,threat:'中',tip:'攻城车优先轰击建筑；用领主或前排主动拦截。'},
+  {name:'苍白监军',desc:'四面进军 · 监军与疗愈祭师',count:32,dirs:[[-26,0],[26,0],[0,-21]],hp:125,damage:15,interval:1.05,threat:'首领',boss:'marshal',tip:'红圈落下前撤离领主。震荡可打断正在蓄力的首领。'},
+  {name:'猎影之夜',desc:'东、西、南包抄 · 潜袭者绕后',count:38,dirs:[[-26,0],[26,0]],hp:148,damage:17,interval:1,threat:'高',tip:'潜袭者追击后排。给射手配护甲，留守卫保护。'},
+  {name:'破城洪流',desc:'四面进军 · 重甲与攻城车',count:44,dirs:[[0,-21],[-26,0],[26,0]],hp:170,damage:19,interval:.92,threat:'高',tip:'法术穿透重甲，寒霜塔延缓军团；农庄与火力需要取舍。'},
+  {name:'无光圣歌',desc:'四面进军 · 祭师与精锐军团',count:48,dirs:[[-26,0],[26,0],[0,-21]],hp:188,damage:21,interval:.88,threat:'极高',tip:'祭师会治疗附近敌人。突击姿态与范围伤害能快速清理。'},
   {name:'永夜王座',desc:'最终决战 · 无光之王',count:50,dirs:[[0,-21],[-26,0],[26,0]],hp:202,damage:23,interval:.9,threat:'首领',boss:'king',tip:'王的陨星会锁定城堡周围。打断蓄力，保持领主存活。'}
 ];
 export const GEAR = {
@@ -46,6 +46,6 @@ export const DAY_EVENTS = [
   {id:'workshop',name:'废弃工坊',icon:'⚒',story:'古老的机括仍有余温。工匠只来得及完成一项工作。',choices:[{id:'salvage',name:'拆解机括',desc:'获得 4 金币与 1 星髓。',gold:4,essence:1},{id:'walls',name:'加固城墙',desc:'支付 4 金币，城堡生命上限 +80 并恢复 80。',gold:-4,maxHp:80,heal:80},{id:'supply',name:'储存军粮',desc:'所有现存建筑恢复全部生命。',repair:true}]},
   {id:'scout',name:'斥候的密报',icon:'➶',story:'斥候发现敌人的粮道。一次突袭，或者一份可以交换的情报。',choices:[{id:'ambush',name:'伏击粮道',desc:'支付 4 金币，今夜敌军生命 −12%。',gold:-4,risk:.88},{id:'sell',name:'出售情报',desc:'获得 6 金币。',gold:6},{id:'prepare',name:'准备箭矢',desc:'今夜全体友军伤害 +10%。',damage:1.1}]}
 ];
-export const STANCES = {guard:{name:'固守',desc:'围绕布阵位置迎敌，最多追击 3.5 格。'},hunt:{name:'突击',desc:'主动追击全场最近敌人，适合清理远处威胁。'}};
+export const STANCES = {guard:{name:'固守',desc:'围绕布阵位置迎敌，最多离开站位约一格。'},hunt:{name:'突击',desc:'主动追击城外敌人，抵达外围防线后停止追击，不进入出生桥。'}};
 export const ENEMY_NAMES = {regular:'游荡者',ranged:'猎手',armored:'重甲卫士',fast:'疾行兽',siege:'攻城车',healer:'疗愈祭师',assassin:'潜袭者',boss:'首领'};
 export const TERRAIN = [{x:-6.4,z:3.2},{x:6.4,z:-3.2}];

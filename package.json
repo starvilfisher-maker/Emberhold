@@ -1,11 +1,11 @@
 {
   "name": "emberhold",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "private": true,
   "type": "module",
   "scripts": {
     "start": "node server.mjs",
-    "test": "node test.mjs && node test-interactions.mjs && node test-campaign.mjs && node test-art.mjs",
+    "test": "node test.mjs && node test-interactions.mjs && node test-campaign.mjs && node test-art.mjs && node test-battlefield.mjs",
     "build": "node build-offline.mjs && node build-pages.mjs"
   }
 }

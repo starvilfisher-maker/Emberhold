@@ -1,8 +1,16 @@
-# 余烬棋城 · Emberhold v1.4
+# 余烬棋城 · Emberhold v1.5
 
 白昼落子，长夜守城。一款结合昼夜城防经营、自走棋阵容构筑与领主亲自参战的原创单人 3D 网页游戏。
 
-**[在线游玩](https://starvilfisher-maker.github.io/Emberhold/)** · **[v1.4 离线下载](https://github.com/starvilfisher-maker/Emberhold/releases/tag/v1.4)** · **[版本记录](CHANGELOG.md)** · **[开发分析与路线](ROADMAP.md)**
+**[在线游玩](https://starvilfisher-maker.github.io/Emberhold/)** · **[v1.5 离线下载](https://github.com/starvilfisher-maker/Emberhold/releases/tag/v1.5)** · **[版本记录](CHANGELOG.md)** · **[开发分析与路线](ROADMAP.md)**
+
+## 开阔战场 · v1.5
+
+- **看清布阵**：新远征从 34 格扩展到 76 格。完整深色格框配合浅色内沿，雪地采用蓝色底纹；金色表示已占用。格线采用三个实例化批次绘制。
+- **自由移镜**：地形面积约为原来的 1.96 倍。拖动空地平移，中键 / 右键也可拖图；滚轮或 ± 缩放至 55%–240%。F 归城，点「领主」定位。拖棋子仍然布阵，拖图不会提交移动指令。
+- **解决遮挡**：城堡挡住单位或正在布阵时自动淡化，也可点「城堡透视」固定半透明。观景时恢复完整模型。
+- **四面来敌**：加宽桥梁，每个入口分三路进军，第 3 夜起有南侧包抄；预告显示实际出兵方向。固守保持在站位附近约一格范围内，突击兵也不会走进出生桥。
+- **生命反馈**：敌我、领主、城堡与城防始终显示朝向屏幕的血条，缩放不改变血条像素大小；H 或「血量数值」显示详细生命。低血量有醒目边框。
 
 ## 微缩城邦 · v1.4
 
@@ -38,7 +46,9 @@
 | 部署 | 拖场上或备战席棋子到方格；拖到棋子上交换；拖回备战席撤回 |
 | 建造与改造 | 点金色基座，或军务厅 → 城防 |
 | 装备 / 姿态 | 军务厅 → 锻造 / 军团 |
-| 缩放战场 | 鼠标滚轮 / 触屏缩放按钮 |
+| 平移战场 | 拖动空地 / 中键或右键拖动；触屏拖空地 |
+| 缩放 / 定位 | 滚轮或 ± / F 归城 / 点「领主」 |
+| 生命数值 / 遮挡 | H 或「血量数值」 / 「城堡透视」 |
 | 观景 / 返回 | 顶部 ◉ / V；Esc 返回 |
 
 棋子与领主自动攻击附近敌人。遇到远处攻城车或祭师，可以亲自出击，或在下次备战将部分棋子设为突击。
@@ -49,7 +59,7 @@
 
 进度保存在当前浏览器，每个白昼自动保存。夜晚刷新回到开战前的白昼。在线、离线和本地地址各自保存。
 
-v1.1 / v1.2 白昼存档可继续经典六夜流程；**重新开始远征才使用八夜关卡及战场事件**。装备等管理功能仍可用于旧远征。旧版本的标签和离线下载继续保留：[v1.3](https://github.com/starvilfisher-maker/Emberhold/releases/tag/v1.3)、[v1.2](https://github.com/starvilfisher-maker/Emberhold/releases/tag/v1.2)、[v1.1](https://github.com/starvilfisher-maker/Emberhold/releases/tag/v1.1)。
+v1.1 / v1.2 白昼存档可继续经典六夜流程；**重新开始远征才使用八夜关卡及战场事件**。装备等管理功能仍可用于旧远征。v1.3 / v1.4 的八夜白昼存档可直接继续，旧布阵与经济保留；经典六夜仍使用 34 格与原出兵规则。旧版本的标签和离线下载继续保留：[v1.4](https://github.com/starvilfisher-maker/Emberhold/releases/tag/v1.4)、[v1.3](https://github.com/starvilfisher-maker/Emberhold/releases/tag/v1.3)、[v1.2](https://github.com/starvilfisher-maker/Emberhold/releases/tag/v1.2)、[v1.1](https://github.com/starvilfisher-maker/Emberhold/releases/tag/v1.1)。
 
 ## 离线与开发
 
@@ -63,6 +73,7 @@ node test.mjs               # 经典规则和六夜通关
 node test-interactions.mjs  # 卡牌、拖放、锁店与战报
 node test-campaign.mjs      # 装备、事件、分支、首领、存档及三个战场八夜通关
 node test-art.mjs          # 场景合批、模型动画、资源回收与镜头恢复
+node test-battlefield.mjs    # 扩展地图、进军路线、追击边界、镜头、拖放与血条
 node build-offline.mjs      # 构建独立离线文件
 node build-pages.mjs        # 同步 docs/ 部署文件
 ```
@@ -74,6 +85,8 @@ GitHub Pages 使用 `main` 分支的 `/docs`。发布工作流检查测试与构
 - `dist/engine.js`：经济、阵容、战斗、胜负与存档。
 - `dist/content.js`：战场、关卡、装备、事件与分支规则。
 - `dist/art.js`：主题场景、城堡、城防、棋子细节与静态模型合批。
+- `dist/battlefield.js`：布阵格、战场边界、入侵方向与进军路线。
+- `dist/battle-visuals.js`：高对比格线、屏幕血条和城堡遮挡。
 - `dist/world.js`：Three.js 场景、模型、动画和特效池。
 - `dist/portraits.js`：原创矢量兵种肖像。
 - `dist/app.js`、`campaign-ui.js`：战场界面、军务厅、输入、音效与存档。

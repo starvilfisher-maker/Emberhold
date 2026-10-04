@@ -1,3 +1,4 @@
+import {FIELD,validDeployment,waveEntrances,invasionPoint,clampEllipse,constrainSoldier} from './battlefield.js';
 import {DIFFICULTIES,BIOMES,CHAPTERS,GEAR,CORE_PATHS,BRANCHES,DAY_EVENTS,STANCES,TERRAIN} from './content.js';
 export const DEFS={
  sentinel:{name:'烬卫剑士',faction:'ember',role:'guardian',cost:2,hp:235,damage:22,range:1.35,speed:3.1,interval:1.0,color:'#e6b374',icon:'♜',ability:'坚守前线'},
@@ -66,7 +67,7 @@ export class Game{
   if(!u)return this.fail('棋子不存在');
   if(!Number.isFinite(x)||!Number.isFinite(z))return this.fail('请选择城堡周围的方格');
   x=Math.round(x/3.2)*3.2;z=Math.round(z/3.2)*3.2;
-  if(Math.abs(x)>9.61||Math.abs(z)>6.41||Math.hypot(x,z)<2.4)return this.fail('请选择城堡周围的方格');
+  if(!validDeployment({x,z},s.legacy))return this.fail('请选择城堡周围的方格');
   const other=s.units.find(v=>v.id!==id&&v.slot&&dist(v.slot,{x,z})<.3);
   if(!u.slot&&!other&&this.deployed().length>=s.level)return this.fail('人口已满：可拖到另一枚棋子上交换');
   return {ok:true,x,z,otherId:other?.id,message:other?'松开交换站位':'松开部署棋子'};
@@ -89,11 +90,12 @@ export class Game{
  toggleCore(){const s=this.state;if(!['day','night'].includes(s.phase))return this.fail('当前无法移动核心');s.core.following=!s.core.following;return this.ok(s.core.following?'核心跟随你移动，附近友军伤害 +25%':'核心已驻扎，光环持续生效');}
  powered(a){const s=this.state;if(this._powered&&this._powered.has(a.id))return this._powered.get(a.id);if(dist(a,s.core)<=s.core.radius)return true;const relays=s.buildings.filter(b=>b.type==='relay'&&b.hp>0);const active=[];let more=true;while(more){more=false;for(const r of relays)if(!active.includes(r)&&(dist(r,s.core)<=s.core.radius||active.some(t=>dist(r,t)<7+t.level))){active.push(r);more=true;}}return active.some(r=>dist(a,r)<7+r.level);}
  nova(){const s=this.state;if(s.phase!=='night')return this.fail('星火震荡在夜晚使用');const h=s.hero;if(h.hp<=0||h.skill>0)return this.fail('星火震荡尚未就绪');h.skill=Math.max(5,12-2*this.perk('reach'));for(const e of s.enemies)if(dist(h,e)<6.5){this.damage(e,(70+10*s.round)*(s.core.path==='fury'?1.3:1),h);e.stun=1.2;e.casting=false;s.hazards=s.hazards.filter(mark=>mark.source!==e.id);}this.emit('nova',{x:h.x,z:h.z,radius:6.5});return this.ok('星火震荡');}
- dash(dx=0,dz=0){const h=this.state.hero;if(!['day','night'].includes(this.state.phase)||h.dash>0||h.hp<=0)return;const len=Math.hypot(dx,dz);if(len<.1){dx=Math.sin(h.angle);dz=Math.cos(h.angle);}else{dx/=len;dz/=len;}h.x=clamp(h.x+dx*4,-19,19);h.z=clamp(h.z+dz*4,-13,13);h.dash=2;this.emit('burst',{x:h.x,z:h.z,radius:2});}
+ dash(dx=0,dz=0){const h=this.state.hero;if(!['day','night'].includes(this.state.phase)||h.dash>0||h.hp<=0)return;const len=Math.hypot(dx,dz);if(len<.1){dx=Math.sin(h.angle);dz=Math.cos(h.angle);}else{dx/=len;dz/=len;}h.x=clamp(h.x+dx*4,this.state.legacy?-19:-FIELD.heroX,this.state.legacy?19:FIELD.heroX);h.z=clamp(h.z+dz*4,this.state.legacy?-13:-FIELD.heroZ,this.state.legacy?13:FIELD.heroZ);if(!this.state.legacy)clampEllipse(h,FIELD.heroX,FIELD.heroZ);h.dash=2;this.emit('burst',{x:h.x,z:h.z,radius:2});}
  spawn(){
   const s=this.state,w=this.wave(),i=s.spawned++,dir=w.dirs[i%w.dirs.length],p=this.profile(i),difficulty=DIFFICULTIES[s.difficulty];
   const hp=(p.boss?(s.legacy?1850:w.boss==='king'?2700:1150):w.hp*(p.armored?1.7:p.siege?2:p.healer?1.2:p.assassin?.85:1))*difficulty.hp*(s.dayBuff.risk||1);
-  const e={id:'e'+(++this.serial),kind:'enemy',x:dir[0]+(this.rand()-.5)*2,z:dir[1]+(this.rand()-.5)*2,hp,maxHp:hp,damage:w.damage*(p.boss?2.2:p.siege?1.8:1)*difficulty.damage,speed:(p.boss?1.1:p.siege?.95:p.fast?2.7:p.assassin?2.6:p.armored?1.35:1.85)*(s.legacy?1:BIOMES[s.biome].speed),range:p.siege?11:p.ranged||p.healer?6:p.boss?2.1:1.2,cd:this.rand(),stun:0,slow:0,abilityCd:p.boss?5:3,casting:false,...p,angle:0};
+  const spawn=s.legacy?{x:dir[0]+(this.rand()-.5)*2,z:dir[1]+(this.rand()-.5)*2}:invasionPoint(s.round,i,this.rand());
+  const e={id:'e'+(++this.serial),kind:'enemy',...spawn,hp,maxHp:hp,damage:w.damage*(p.boss?2.2:p.siege?1.8:1)*difficulty.damage,speed:(p.boss?1.1:p.siege?.95:p.fast?2.7:p.assassin?2.6:p.armored?1.35:1.85)*(s.legacy?1:BIOMES[s.biome].speed),range:p.siege?11:p.ranged||p.healer?6:p.boss?2.1:1.2,cd:this.rand(),stun:0,slow:0,abilityCd:p.boss?5:3,casting:false,...p,angle:0};
   s.enemies.push(e);if(p.boss)this.emit('boss',{name:w.boss==='marshal'?'苍白监军':'无光之王'});
  }
  moveToward(a,b,speed,dt){let dx=b.x-a.x,dz=b.z-a.z,d=Math.hypot(dx,dz);if(d>.04){const step=Math.min(d,speed*dt);a.x+=dx/d*step;a.z+=dz/d*step;a.angle=Math.atan2(dx,dz);a.moving=true;}}
@@ -112,7 +114,7 @@ export class Game{
   if(target.id==='hero'&&target.hp===0){target.respawn=8;this.emit('heroDown');}
  }
  finishReport(income=null){const s=this.state;if(!s.report)return;s.report.duration=s.nightTime;s.report.income=income;s.lastReport=JSON.parse(JSON.stringify(s.report));}
- update(dt,input={x:0,z:0}){const s=this.state;if(!['day','night'].includes(s.phase))return;dt=Math.min(dt,.1);s.time+=dt;const h=s.hero;h.skill=Math.max(0,h.skill-dt);h.dash=Math.max(0,h.dash-dt);h.moving=false;if(h.hp>0){const len=Math.hypot(input.x||0,input.z||0);if(len>.01){const speed=6*(1+.15*this.perk('haste'));h.x=clamp(h.x+input.x/Math.max(1,len)*speed*dt,-19,19);h.z=clamp(h.z+input.z/Math.max(1,len)*speed*dt,-13,13);h.angle=Math.atan2(input.x,input.z);h.moving=true;}}else{h.respawn-=dt;if(h.respawn<=0){h.hp=h.maxHp;h.x=1;h.z=3;this.emit('heroUp');}}
+ update(dt,input={x:0,z:0}){const s=this.state;if(!['day','night'].includes(s.phase))return;dt=Math.min(dt,.1);s.time+=dt;const h=s.hero;h.skill=Math.max(0,h.skill-dt);h.dash=Math.max(0,h.dash-dt);h.moving=false;if(h.hp>0){const len=Math.hypot(input.x||0,input.z||0);if(len>.01){const speed=6*(1+.15*this.perk('haste'));h.x=clamp(h.x+input.x/Math.max(1,len)*speed*dt,this.state.legacy?-19:-FIELD.heroX,this.state.legacy?19:FIELD.heroX);h.z=clamp(h.z+input.z/Math.max(1,len)*speed*dt,this.state.legacy?-13:-FIELD.heroZ,this.state.legacy?13:FIELD.heroZ);h.angle=Math.atan2(input.x,input.z);h.moving=true;}if(!s.legacy)clampEllipse(h,FIELD.heroX,FIELD.heroZ);}else{h.respawn-=dt;if(h.respawn<=0){h.hp=h.maxHp;h.x=1;h.z=3;this.emit('heroUp');}}
  if(s.core.following){const dd=dist(s.core,h);if(dd>.6)this.moveToward(s.core,h,Math.max(6,dd*2),dt);}if(s.phase==='day'){h.hp=Math.min(h.maxHp,h.hp+dt*15);return;}
  s.nightTime+=dt;const w=this.wave();s.spawnTimer-=dt;if(s.spawned<w.count&&s.spawnTimer<=0){this.spawn();s.spawnTimer=w.interval;}const traits=this.traits(),army=this.deployed().filter(u=>u.hp>0),activeEnemies=s.enemies.filter(e=>e.hp>0);this._powered=null;const power=new Map();for(const ally of [...army,h,s.castle,...s.buildings])power.set(ally.id,this.powered(ally));this._powered=power;this.updateHazards(dt);for(const a of [...army,h,...activeEnemies]){a.hit=Math.max(0,(a.hit||0)-dt);a.attackAnim=Math.max(0,(a.attackAnim||0)-dt);}
  for(const u of army){
@@ -158,6 +160,8 @@ export class Game{
   if(e.healer&&e.abilityCd<=0){const ally=activeEnemies.filter(a=>a.hp>0&&a.hp<a.maxHp&&dist(a,e)<8).sort((a,b)=>a.hp/a.maxHp-b.hp/b.maxHp)[0];if(ally){this.heal(ally,30+s.round*4);this.emit('shot',{x:e.x,z:e.z,tx:ally.x,tz:ally.z,color:'enemyHeal'});}e.abilityCd=4;}
   if(e.boss&&!s.legacy&&e.abilityCd<=0&&!e.casting){const aim=nearest(e,[...army,h],12)||s.castle;this.addHazard(e,aim);if(w.boss==='king'&&e.hp<e.maxHp*.5)this.addHazard(e,{x:s.castle.x+4,z:s.castle.z-2});e.abilityCd=w.boss==='king'?7:9;e.casting=true;}
   if(e.casting)continue;
+  // Clear the wide approach before engaging the inner defense. Nearby defenders can intercept.
+  if(e.approach){if(dist(e,e.approach)<1||nearest(e,defenders,4)){e.approach=null;}else{this.moveToward(e,e.approach,e.speed*(e.slow>0?.55:1),dt);continue;}}
   let target;
   if(e.siege)target=nearest(e,s.buildings,Infinity)||s.castle;
   else if(e.assassin)target=nearest(e,army,Infinity,a=>DEFS[a.def].role!=='guardian')||nearest(e,defenders,6.5)||s.castle;
@@ -165,14 +169,15 @@ export class Game{
   if(dist(e,target)>e.range+(.65*(target.id==='castle')))this.moveToward(e,target,e.speed*(e.slow>0?.55:1),dt);
   else if(e.cd<=0){this.hurtAlly(target,e.damage);e.cd=e.siege?3:e.boss?1.6:1.2;this.emit('shot',{x:e.x,z:e.z,tx:target.x,tz:target.z,color:'enemy'});}
  }
- const moving=[...army,...activeEnemies];for(let i=0;i<moving.length;i++)for(let j=i+1;j<moving.length;j++){const a=moving[i],b=moving[j],dx=a.x-b.x,dz=a.z-b.z,d=Math.hypot(dx,dz);if(d>.001&&d<.6){const push=(.6-d)*.5;a.x+=dx/d*push;a.z+=dz/d*push;b.x-=dx/d*push;b.z-=dz/d*push;}}
+ const moving=[...army,...activeEnemies];for(let i=0;i<moving.length;i++)for(let j=i+1;j<moving.length;j++){const a=moving[i],b=moving[j],dx=a.x-b.x,dz=a.z-b.z,d=Math.hypot(dx,dz);if(d<.6){const safe=d>.001?d:1,ax=d>.001?dx:Math.cos(i*2.4+j),az=d>.001?dz:Math.sin(i*2.4+j);const push=(.6-d)*.5;a.x+=ax/safe*push;a.z+=az/safe*push;b.x-=ax/safe*push;b.z-=az/safe*push;}}
+ if(!s.legacy)for(const u of army)constrainSoldier(u);
  for(const e of s.enemies)if(e.hp<=0){s.kills++;if(s.kills%3===0)s.gold++;this.emit('death',{x:e.x,z:e.z,radius:e.boss?4:.9});}s.enemies=s.enemies.filter(e=>e.hp>0);
  if(s.castle.hp<=0){s.castle.hp=0;this.finishReport();s.phase='lost';this.emit('end',{won:false});return;}if(s.spawned===w.count&&s.enemies.length===0)this.dawn();}
  dawn(){const s=this.state;this._powered=null;s.hazards=[];if(s.round===this.totalNights()){this.finishReport();s.phase='won';s.won=true;this.emit('end',{won:true});return;}const inc=this.income();const total=inc.base+inc.interest+inc.farm;this.finishReport(inc);s.gold+=total;if(!s.legacy)s.essence+=this.wave().boss?3:2;s.castle.hp=Math.min(s.castle.maxHp,s.castle.hp+(s.legacy?45:BIOMES[s.biome].heal)+s.buildings.filter(b=>b.hp>0&&b.branch==='granary').length*70);s.hero.hp=s.hero.maxHp;s.hero.x=2.5;s.hero.z=3.5;s.hero.skill=0;s.hero.respawn=0;for(const u of s.units){u.hp=u.maxHp;u.moving=false;if(u.slot){u.x=u.slot.x;u.z=u.slot.z;}}s.core.following=false;s.core.x=0;s.core.z=3;s.phase='reward';const pool=[...PERKS];s.reward=[];for(let i=0;i<3;i++)s.reward.push(pool.splice(Math.floor(this.rand()*pool.length),1)[0].id);this.emit('dawn',{income:total,round:s.round});}
  choosePerk(id){const s=this.state;if(s.phase!=='reward'||!s.reward.includes(id))return this.fail('请选择当前可用的祝福');s.perks.push(id);if(id==='wealth')s.gold+=12;if(id==='reach')s.core.radius+=2;if(id==='stone'){s.castle.maxHp+=150;s.castle.hp=Math.min(s.castle.maxHp,s.castle.hp+250);}if(id==='vigor'){s.hero.maxHp+=60;s.hero.hp=s.hero.maxHp;}s.reward=[];s.round++;s.phase='day';s.dayBuff={};if(!s.legacy)this.prepareEvent();if(!s.shopLocked)this.rollShop(true);this.emit('saveday');return this.ok('获得祝福：'+PERKS.find(p=>p.id===id).name);}
 
  totalNights(){return this.state.legacy?6:CHAPTERS.length;}
- wave(){const s=this.state;return (s.legacy?WAVES:CHAPTERS)[s.round-1];}
+ wave(){const s=this.state;return s.legacy?WAVES[s.round-1]:{...CHAPTERS[s.round-1],dirs:waveEntrances(s.round).map(e=>[e.x,e.z])};}
  profile(index){
   const s=this.state;if(s.legacy)return enemyProfile(s.round,index);
   const boss=!!this.wave().boss&&index===this.wave().count-1;
@@ -212,7 +217,7 @@ export class Game{
   try{
    const d=JSON.parse(raw),s=d.state,finite=(n,a=0,b=1e9)=>Number.isFinite(n)&&n>=a&&n<=b;
    if(![1,2].includes(d.version)||s?.phase!=='day'||!Array.isArray(s.units)||s.units.length>16||!Array.isArray(s.shop)||s.shop.length!==5||!s.shop.every(k=>k===null||DEFS[k])||!Number.isInteger(s.round)||s.round<1||s.round>(d.version===1||s.legacy?6:8)||!Number.isInteger(s.level)||s.level<2||s.level>8||!finite(s.gold)||!s.castle||!finite(s.castle.hp)||!finite(s.castle.maxHp,1)||!s.hero||!finite(s.hero.hp)||!finite(s.hero.maxHp,1)||!s.core||!finite(s.core.radius,1,30)||!finite(s.core.x,-100,100)||!finite(s.core.z,-100,100)||!Array.isArray(s.buildings)||s.buildings.length>6||!Array.isArray(s.perks)||!s.perks.every(id=>PERKS.some(p=>p.id===id))||!Number.isInteger(d.seed)||!Number.isInteger(d.serial))return null;
-   const validSlot=p=>p&&Number.isFinite(p.x)&&Number.isFinite(p.z)&&Math.abs(p.x)<=9.61&&Math.abs(p.z)<=6.41&&Math.hypot(p.x,p.z)>=2.4&&Math.abs(p.x/3.2-Math.round(p.x/3.2))<.001&&Math.abs(p.z/3.2-Math.round(p.z/3.2))<.001;
+   const validSlot=p=>validDeployment(p,d.version===1||s.legacy);
    if(!s.units.every(u=>DEFS[u.def]&&/^u\d+$/.test(u.id)&&[1,2,3].includes(u.star)&&finite(u.hp)&&finite(u.maxHp,1)&&(u.slot===null||validSlot(u.slot))&&(!u.gear||GEAR[u.gear])))return null;
    const ids=s.units.map(u=>u.id),slots=s.units.filter(u=>u.slot).map(u=>u.slot.x+','+u.slot.z);
    if(new Set(ids).size!==ids.length||new Set(slots).size!==slots.length||slots.length>s.level||s.units.length-slots.length>8)return null;
